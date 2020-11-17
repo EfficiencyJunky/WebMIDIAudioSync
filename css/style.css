@@ -1,0 +1,25 @@
+html, body{
+    height: 100%;
+    text-align: center;
+    background-color: rosybrown;
+    /* vertical-align: middle; */
+}
+
+
+#slider {
+    position: relative;
+    /* top:-1rem; */
+    background-color:green;
+    /* line-height: 100%; */
+    width:75%;
+    height: 4rem;
+    
+
+}
+
+#slider-parent{
+    position: relative;
+    top: 10%;
+    margin-top: -2rem;
+    background-color: red;
+}
