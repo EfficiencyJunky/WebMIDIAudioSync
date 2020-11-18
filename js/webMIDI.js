@@ -168,14 +168,17 @@ function _sliderOnInput(event){
 // ************************ BUTTON METHODS **************************************
 function _skipAhead15Seconds(event){
     
-    console.log("Transport Time", Tone.Transport.position);
+    let currentTransportTimeSeconds = Tone.Time(Tone.Transport.position).toSeconds();
 
-    // let newTransportPositioin = Tone.Time(Tone.Transport.now() + 15).toBarsBeatsSixteenths();
-    // Tone.Transport.position = newTransportPositioin;
+    console.log("Transport Time", currentTransportTimeSeconds);
 
-    Tone.Transport.position = "5:0:0";
+    let newTimeSeconds = currentTransportTimeSeconds + 15;
+
+    let newTimeBarsBeetsSixteenths = Tone.Time(newTimeSeconds).toBarsBeatsSixteenths();
+
+    Tone.Transport.position = newTimeBarsBeetsSixteenths;
     
-  }
+}
 
 
 
