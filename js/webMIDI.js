@@ -1,23 +1,13 @@
-//let iacDriverName = "IAC Driver MyMIDIPort";
-let iacDriverName = "mio";
-
-function scale(inputMIDIValue){
-
-    let hslMin = 0,
-        hslMax = 360,
-        midiMin = 0,
-        midiMax = 126;
-
-    let percent = (inputMIDIValue - midiMin) / (midiMax - midiMin);
-    let outputX = percent * (hslMax - hslMin) + hslMin;
-
-    return outputX;
-}
+let midiOutputDeviceName = "IAC Driver MyMIDIPort";
+// let midiOutputDeviceName = "mio";
 
 let slider = document.getElementById("slider");
 let sliderParent = document.getElementById("slider-parent");
+let button = document.getElementById("test-button");
 
 slider.oninput = _sliderOnInput;
+button.onclick = _skipAhead15Seconds;
+
 
 WebMidi.enable(function (err) {
 
@@ -29,8 +19,8 @@ WebMidi.enable(function (err) {
 
 
     // Viewing available inputs and outputs
-    console.log(WebMidi.inputs);
-    console.log(WebMidi.outputs);
+    console.log("WebMidi Inputs:", WebMidi.inputs);
+    console.log("WebMidi Outputs:", WebMidi.outputs);
 
 
     printMidiInputInfo(WebMidi.inputs);
@@ -42,7 +32,8 @@ WebMidi.enable(function (err) {
 
 
 function printMidiInputInfo(inputs){
-
+    
+    console.log("*****************************************");
 
     inputs.forEach( (input, index) => {
         console.log("INPUT #", index);
@@ -98,8 +89,8 @@ function addListeners(input){
             var message = e.data[1];
             var value = e.data[2];
 
-            sendCCMessage(message, value, channel, iacDriverName);
-            printCCMessage(message, value, channel, outputName);
+            sendCCMessage(message, value, channel, midiOutputDeviceName);
+            // printCCMessage(message, value, channel, outputName);
                       
         }
     );
@@ -123,6 +114,13 @@ function sendCCMessage(message, value, channel, outputName){
 
     let output = WebMidi.getOutputByName(outputName);
     output.sendControlChange(message, value, channel);
+
+}
+
+function sendNoteMessage(noteNumber, velocity, channel, outputName){
+
+    let output = WebMidi.getOutputByName(outputName);
+    output.playNote(noteNumber, channel, {velocity: velocity/127});
 
 }
 
@@ -151,14 +149,49 @@ function _sliderOnInput(event){
     const sliderLuminance = (sliderVal != 127) ? 50 : 100;
 
     sliderParent.setAttribute("style", `background-color:hsl(${sliderColor}, 100%, ${sliderLuminance}%);`)
-    console.log(sliderVal);
-    console.log(Math.round(sliderColor));
-    console.log(sliderColor);
+    // console.log(sliderVal);
+    // console.log(Math.round(sliderColor));
+    // console.log(sliderColor);
     // console.log(sliderLuminance);
 
     let channel = 1;
     let message = 73;
 
-    sendCCMessage(message, sliderVal, channel, iacDriverName);
+    sendCCMessage(message, sliderVal, channel, midiOutputDeviceName);
 
+}
+
+
+
+
+
+// ************************ BUTTON METHODS **************************************
+function _skipAhead15Seconds(event){
+    
+    console.log("Transport Time", Tone.Transport.position);
+
+    // let newTransportPositioin = Tone.Time(Tone.Transport.now() + 15).toBarsBeatsSixteenths();
+    // Tone.Transport.position = newTransportPositioin;
+
+    Tone.Transport.position = "5:0:0";
+    
+  }
+
+
+
+
+
+
+// ************************ HELPER METHODS **************************************
+function scale(inputMIDIValue){
+
+    let hslMin = 0,
+        hslMax = 360,
+        midiMin = 0,
+        midiMax = 126;
+
+    let percent = (inputMIDIValue - midiMin) / (midiMax - midiMin);
+    let outputX = percent * (hslMax - hslMin) + hslMin;
+
+    return outputX;
 }
