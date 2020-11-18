@@ -1,5 +1,9 @@
+// Tone.Transport.PPQ = 480;
+
+var midiObject;
+
 // const midiFileURL = "media/Janet_LEFT_logic.mid";
-const midiFileURL = "media/Janet_all_midi_tracks.mid";
+const midiFileURL = "media/Janet_all_midi_tracks_new.mid";
 
 const ccMessageNumbers = [70, 71, 73, 74];
 
@@ -22,12 +26,17 @@ async function readMidiFile(){
   //the file name decoded from the MIDI object
   const name = currentMidi.name;
 
+  console.log("currentMidi ppq: ", currentMidi.header.ppq);
+  console.log("currentMidi all: ", currentMidi.header.tempos[0].bpm);
+
   console.log("currentMidi Name: ", name);
   console.log("Number of Tracks: ", currentMidi.tracks.length);
 
   currentMidi.tracks.forEach((track) => {
     console.log("Track", track);
   });
+
+  midiObject = currentMidi;
 
   const synths = [];
 
@@ -44,29 +53,8 @@ async function readMidiFile(){
 
           const channel = track.channel + 1;
 
-          //create a synth for each track
-          // const synth = new Tone.PolySynth(Tone.Synth, {
-          //   envelope: {
-          //     attack: 0.02,
-          //     decay: 0.1,
-          //     sustain: 0.3,
-          //     release: 1,
-          //   },
-          // }).toDestination();
-          // synths.push(synth);
-          //schedule all of the events
-          // track.notes.forEach((note) => {
-          //   synth.triggerAttackRelease(
-          //     note.name,
-          //     note.duration,
-          //     note.time + now,
-          //     note.velocity
-          //   );
-          // });
-
           // CC SCHEDULING
-          // Create Control Change message transport schedule
-
+          // Schedule Control Change messages to the transport
           ccMessageNumbers.forEach( (ccNumber) => {
 
             track.controlChanges[ccNumber].forEach((cc) => {
@@ -80,7 +68,7 @@ async function readMidiFile(){
           });
 
           // NOTES SCHEDULING
-          // Create Note message transport schedule
+          // Schedule Note messages to the transport
           track.notes.forEach((note) => {
 
             Tone.Transport.schedule((time) => {

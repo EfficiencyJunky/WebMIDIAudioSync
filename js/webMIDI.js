@@ -168,20 +168,22 @@ function _sliderOnInput(event){
 // ************************ BUTTON METHODS **************************************
 function _skipAhead15Seconds(event){
     
-    let currentTransportTimeSeconds = Tone.Time(Tone.Transport.position).toSeconds();
+    // const newTimeTicks = Tone.Transport.ticks + (midiObject.header.ppq * (midiObject.header.tempos[0].bpm / 60) * 15);
 
-    console.log("Transport Time", currentTransportTimeSeconds);
+    // add 15 seconds to Transport
+    const newTimeSeconds = Tone.Transport.seconds + 15;
 
-    let newTimeSeconds = currentTransportTimeSeconds + 15;
+    Tone.Transport.seconds = newTimeSeconds + 15;
 
-    let newTimeBarsBeetsSixteenths = Tone.Time(newTimeSeconds).toBarsBeatsSixteenths();
+    // print the new time in seconds and ticks
+    console.log("**************************************************");
+    console.log("time seconds", newTimeSeconds);
+    console.log("target time", Tone.Transport.ticks, "ticks");
 
-    Tone.Transport.position = newTimeBarsBeetsSixteenths;
-    
+    // syncronize the MIDI tracks at that time (this isn't working very well with the Janet MIDI tracks because of a bunch of random 0 values in CC71)
+    // syncMidiTracks(Tone.Transport.ticks, "ticks");
+    syncMidiTracks(newTimeSeconds, "seconds");
 }
-
-
-
 
 
 
@@ -197,4 +199,69 @@ function scale(inputMIDIValue){
     let outputX = percent * (hslMax - hslMin) + hslMin;
 
     return outputX;
+}
+
+
+
+
+function syncMidiTracks(timeToSync, timeType){
+
+    midiObject.tracks.forEach((track) => {
+
+        const channel = track.channel + 1;
+
+        // CC SCHEDULING
+        // Schedule Control Change messages to the transport
+        ccMessageNumbers.forEach( (ccNumber) => {
+
+            let ccArray = track.controlChanges[ccNumber];
+            
+            let ccIndex = findCCValueAtClosestTime(ccArray, timeToSync, timeType);
+            
+            console.log("ccNumber:", ccNumber);
+            console.log("ccIndex:", ccIndex);
+            console.log("ccArray:", ccArray);
+
+            sendCCMessage(ccNumber, ccArray[ccIndex].value * 127, channel, midiOutputDeviceName);
+            
+        });
+
+    });
+
+}
+
+
+
+// const get_age = (data, to_find) => 
+//   data.reduce( ({age}, {age:a}) =>
+//      Math.abs(to_find - a) < Math.abs(to_find - age) ? {age: a} : {age}
+// );
+
+
+
+  /*
+  * _findItemForLatLng -- Finds an item with the smallest delta in distance to the given latlng coords
+  */
+function findCCValueAtClosestTime(ccArray, targetTime, timeType) {
+    let index = null,
+
+    d = Infinity;
+
+    ccArray.forEach(function(cc, i) {
+       
+       const dist = (timeType === "seconds") ? targetTime - cc.time : targetTime - cc.ticks;
+
+        if (dist >= 0 && dist < d) {
+            d = dist;
+         
+            index = i;
+        }
+    });
+
+    // if(index == null){
+    //     return 64;
+    // }
+
+    // return ccArray[index].value;
+    return index;
 }
