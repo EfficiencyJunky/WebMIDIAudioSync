@@ -20,14 +20,34 @@
 </head>
 <body>
 
-    <div>
-        <button id="test-button">testing</button>
-    </div>
     <tone-content>
         <div id="Description">
-            Parse a MIDI file into a Tone.js-friendly JSON format.
+            Sync a MIDI file and audio file to run light animations
         </div>
+        <div id="FileDropAudio" class="file-drop audio-file-drop">
+            <div id="Text">
+                Drop audio file here
+            </div>
+            <input type="file" accept="audio/midi" />
+        </div>         
+        <div id="FileDropMidi" class="file-drop midi-file-drop">
+            <div id="Text">
+                Drop midi file here
+            </div>
+            <input type="file" accept="audio/midi" />
+        </div>
+        <div id="Results">
+            <textarea
+                id="ResultsText"
+                placeholder="MIDI file json output..."
+            ></textarea>
+        </div>           
+
+            
         <tone-play-toggle></tone-play-toggle>
+        <div>
+            <button id="test-button">skip ahead 15 seconds</button>
+        </div>        
     </tone-content>
 
 
@@ -39,7 +59,109 @@
 
     <!-- JAVASCRIPT -->
     <!-- <script type="text/javascript" src="js/logic.js"></script>     -->
-    
+
+    <!-- FILE DROP LOGIC -->
+    <script type="text/javascript">
+
+        // comment these two variables out if you want to load the builtin examples
+        // that are specified in the variables const midiFileURL and const audioFileURL
+        let currentMidi = null;
+        let useAudioFileLoaderUI = true;
+
+        if (
+            !(
+                window.File &&
+                window.FileReader &&
+                window.FileList &&
+                window.Blob
+            )
+        ) {
+            document.querySelector("#FileDropMidi #Text").textContent =
+                "Reading files not supported by this browser";
+            document.querySelector("#FileDropAudio #Text").textContent =
+                "Reading files not supported by this browser";
+        } else {
+            // MIDI FILE DROP
+            const fileDropMidi = document.querySelector("#FileDropMidi");
+
+            fileDropMidi.addEventListener("dragenter", () =>
+                fileDropMidi.classList.add("Hover")
+            );
+
+            fileDropMidi.addEventListener("dragleave", () =>
+                fileDropMidi.classList.remove("Hover")
+            );
+
+            fileDropMidi.addEventListener("drop", () =>
+                fileDropMidi.classList.remove("Hover")
+            );
+
+            document
+                .querySelector("#FileDropMidi input")
+                .addEventListener("change", (e) => {
+                    //get the files
+                    const files = e.target.files;
+
+                    // load the first one in the array
+                    if (files.length > 0) {
+                        const file = files[0];
+                        document.querySelector(
+                            "#FileDropMidi #Text"
+                        ).textContent = file.name;
+                        parseMidiFile(file);
+                    }
+                });
+
+
+            // AUDIO FILE DROP
+            const fileDropAudio = document.querySelector("#FileDropAudio");
+
+            fileDropAudio.addEventListener("dragenter", () =>
+                fileDropAudio.classList.add("Hover")
+            );
+
+            fileDropAudio.addEventListener("dragleave", () =>
+                fileDropAudio.classList.remove("Hover")
+            );
+
+            fileDropAudio.addEventListener("drop", () =>
+                fileDropAudio.classList.remove("Hover")
+            );
+
+            document
+                .querySelector("#FileDropAudio input")
+                .addEventListener("change", (e) => {
+                    //get the files
+                    const files = e.target.files;
+
+                    // load the first one in the array
+                    if (files.length > 0) {
+                        const file = files[0];
+                        document.querySelector(
+                            "#FileDropAudio #Text"
+                        ).textContent = file.name;
+                        loadAudioFile(file.name);
+                    }
+                });                
+        }
+
+        function parseMidiFile(file) {
+            //read the file
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const midi = new Midi(e.target.result);
+                document.querySelector(
+                    "#ResultsText"
+                ).value = JSON.stringify(midi, undefined, 2);
+                document
+                    .querySelector("tone-play-toggle")
+                    .removeAttribute("disabled");
+                currentMidi = midi;
+                loadMidiFile(currentMidi);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/webmidi"></script>
     <!-- <script type="text/javascript" src="js/nativeMIDI.js"></script> -->

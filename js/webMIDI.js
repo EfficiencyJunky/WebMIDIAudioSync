@@ -175,11 +175,6 @@ function _skipAhead15Seconds(event){
 
     Tone.Transport.seconds = newTimeSeconds + 15;
 
-    // print the new time in seconds and ticks
-    console.log("**************************************************");
-    console.log("time seconds", newTimeSeconds);
-    console.log("target time", Tone.Transport.ticks, "ticks");
-
     // syncronize the MIDI tracks at that time (this isn't working very well with the Janet MIDI tracks because of a bunch of random 0 values in CC71)
     // syncMidiTracks(Tone.Transport.ticks, "ticks");
     syncMidiTracks(newTimeSeconds, "seconds");
@@ -206,6 +201,12 @@ function scale(inputMIDIValue){
 
 function syncMidiTracks(timeToSync, timeType){
 
+    // print the new time in seconds and ticks
+    // console.log("**************************************************");
+    // console.log("time seconds", timeToSync);
+    // console.log("target time", Tone.Transport.ticks, "ticks");
+
+
     midiObject.tracks.forEach((track) => {
 
         const channel = track.channel + 1;
@@ -218,9 +219,9 @@ function syncMidiTracks(timeToSync, timeType){
             
             let ccIndex = findCCValueAtClosestTime(ccArray, timeToSync, timeType);
             
-            console.log("ccNumber:", ccNumber);
-            console.log("ccIndex:", ccIndex);
-            console.log("ccArray:", ccArray);
+            // console.log("ccNumber:", ccNumber);
+            // console.log("ccIndex:", ccIndex);
+            // console.log("ccArray:", ccArray);
 
             sendCCMessage(ccNumber, ccArray[ccIndex].value * 127, channel, midiOutputDeviceName);
             

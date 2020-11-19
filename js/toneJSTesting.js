@@ -7,36 +7,55 @@ const midiFileURL = "media/Janet_all_midi_tracks_new.mid";
 
 const ccMessageNumbers = [70, 71, 73, 74];
 
+if(typeof(currentMidi) === "undefined"){
+  loadMidiFile();
+}
+
 // var player = new Tone.Player("_REFERENCE/janet/Janet-156-SC-NoDrums.aif").toMaster();
-var player = new Tone.Player("media/janet_full.mp3").toMaster();
+var player;
 
-readMidiFile();
+const audioFileURL = "media/janet_full.mp3";
 
-player.sync().start(0);
+if(typeof(useAudioFileLoaderUI) === "undefined" || useAudioFileLoaderUI === false){
+  loadAudioFile();
+}
+
+
+
 // player.sync(0);
+
+function loadAudioFile(fileName){
+
+  let audioFilePath = (fileName) ? "media/" + fileName : audioFileURL;
+
+  player = new Tone.Player(audioFilePath).toMaster();
+
+  player.sync().start(0);
+}
+
 
 
 // ************************ MIDI FILE PREPARATION **************************************
 // this is the main functionality of the ToneJS MIDI library for reading MIDI files
-async function readMidiFile(){
+async function loadMidiFile(midiToUse){
 
   // load a midi file in the browser
-  const currentMidi = await Midi.fromUrl(midiFileURL);
+  const midiObj = (midiToUse) ? midiToUse : await Midi.fromUrl(midiFileURL);
   
   //the file name decoded from the MIDI object
-  const name = currentMidi.name;
+  const name = midiObj.name;
 
-  console.log("currentMidi ppq: ", currentMidi.header.ppq);
-  console.log("currentMidi all: ", currentMidi.header.tempos[0].bpm);
+  console.log("midiObj ppq: ", midiObj.header.ppq);
+  console.log("midiObj all: ", midiObj.header.tempos[0].bpm);
 
-  console.log("currentMidi Name: ", name);
-  console.log("Number of Tracks: ", currentMidi.tracks.length);
+  console.log("midiObj Name: ", name);
+  console.log("Number of Tracks: ", midiObj.tracks.length);
 
-  currentMidi.tracks.forEach((track) => {
+  midiObj.tracks.forEach((track) => {
     console.log("Track", track);
   });
 
-  midiObject = currentMidi;
+  midiObject = midiObj;
 
   const synths = [];
 
@@ -45,11 +64,11 @@ async function readMidiFile(){
       
       const playing = e.detail;
 
-      if (playing && currentMidi) {
+      if (playing && midiObj) {
         
         // const now = Tone.now() + 0.5;
 
-        currentMidi.tracks.forEach((track) => {
+        midiObj.tracks.forEach((track) => {
 
           const channel = track.channel + 1;
 
