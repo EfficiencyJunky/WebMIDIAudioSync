@@ -8,6 +8,7 @@ let midiOutSelect = document.getElementById("midi-output-select");
 
 slider.oninput = _sliderOnInput;
 button.onclick = _skipAhead15Seconds;
+midiOutSelect.onchange = (e) => { midiOutputDeviceName = e.target.value; };
 
 
 WebMidi.enable(function (err) {
@@ -23,10 +24,9 @@ WebMidi.enable(function (err) {
     console.log("WebMidi Inputs:", WebMidi.inputs);
     console.log("WebMidi Outputs:", WebMidi.outputs);
 
-
+    // load up our select HTML element with the names of the available MIDI outputs
     loadMidiOutputSelect(WebMidi.outputs);
     
-
     printMidiInputInfo(WebMidi.inputs);
 
     // setupMidiInputs(WebMidi.inputs);
@@ -34,25 +34,25 @@ WebMidi.enable(function (err) {
 
 });
 
-
+// load up our select HTML element with the names of the available MIDI outputs
 function loadMidiOutputSelect(outputs){
 
     outputs.forEach( (output, index) => {
         var opt = document.createElement("option");
-        opt.value= output.name;
-        opt.innerHTML = output.name; // whatever property it has
+        let midiOutName = output.name;
+
+        opt.value= midiOutName;
+        opt.innerHTML = midiOutName;
 
         // then append it to the select element
         midiOutSelect.appendChild(opt);
 
         if(index === 0){
-            midiOutSelect.value = output.name;
-            midiOutputDeviceName = output.name;
+            midiOutSelect.value = midiOutName;
+            midiOutputDeviceName = midiOutName;
+            console.log("Selected MIDI output:", midiOutputDeviceName)
         }
     });
-
-
-
 }
 
 
