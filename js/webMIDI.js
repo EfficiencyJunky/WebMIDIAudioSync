@@ -1,9 +1,10 @@
-let midiOutputDeviceName = "IAC Driver MyMIDIPort";
-// let midiOutputDeviceName = "mio";
+// let midiOutputDeviceName = "IAC Driver MyMIDIPort";
+let midiOutputDeviceName;
 
 let slider = document.getElementById("slider");
 let sliderParent = document.getElementById("slider-parent");
 let button = document.getElementById("test-button");
+let midiOutSelect = document.getElementById("midi-output-select");
 
 slider.oninput = _sliderOnInput;
 button.onclick = _skipAhead15Seconds;
@@ -23,12 +24,38 @@ WebMidi.enable(function (err) {
     console.log("WebMidi Outputs:", WebMidi.outputs);
 
 
+    loadMidiOutputSelect(WebMidi.outputs);
+    
+
     printMidiInputInfo(WebMidi.inputs);
 
     // setupMidiInputs(WebMidi.inputs);
 
 
 });
+
+
+function loadMidiOutputSelect(outputs){
+
+    outputs.forEach( (output, index) => {
+        var opt = document.createElement("option");
+        opt.value= output.name;
+        opt.innerHTML = output.name; // whatever property it has
+
+        // then append it to the select element
+        midiOutSelect.appendChild(opt);
+
+        if(index === 0){
+            midiOutSelect.value = output.name;
+            midiOutputDeviceName = output.name;
+        }
+    });
+
+
+
+}
+
+
 
 
 function printMidiInputInfo(inputs){
