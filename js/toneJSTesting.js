@@ -14,19 +14,47 @@ if(typeof(currentMidi) === "undefined"){
 // var player = new Tone.Player("_REFERENCE/janet/Janet-156-SC-NoDrums.aif").toMaster();
 var player;
 
-const audioFileURL = "media/janet_full.mp3";
+const defaultAudioFileURL = "media/janet_full.mp3";
+const loadDefaultOnInitialization = true;
+
+const audioFileNamesList = ["janet_full.mp3"];
+let audioFileSelct = document.getElementById("audio-file-select");
+audioFileSelct.onchange = (e) => { loadAudioFile(e.target.value);};
+
 
 if(typeof(useAudioFileLoaderUI) === "undefined" || useAudioFileLoaderUI === false){
-  loadAudioFile();
+  // loadAudioFile();
+  loadAudioFileSelect(audioFileNamesList);
 }
 
 
 
-// player.sync(0);
+
+// load up our select HTML element with the names of the available MIDI outputs
+function loadAudioFileSelect(fileNamesList){
+
+  fileNamesList.forEach( (fileName, index) => {
+      var opt = document.createElement("option");
+
+      opt.value= fileName;
+      opt.innerHTML = fileName;
+
+      // then append it to the select element
+      audioFileSelct.appendChild(opt);
+
+      if(index === 0 && loadDefaultOnInitialization){
+          audioFileSelct.value = fileName;
+          console.log("loading default audio file:", fileName);
+          loadAudioFile(fileName);          
+      }
+  });
+}
+
+
 
 function loadAudioFile(fileName){
 
-  let audioFilePath = (fileName) ? "media/" + fileName : audioFileURL;
+  let audioFilePath = (fileName) ? "media/" + fileName : defaultAudioFileURL;
 
   player = new Tone.Player(audioFilePath).toMaster();
 
